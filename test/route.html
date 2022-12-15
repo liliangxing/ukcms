@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Building a router</title>
+    <script>
+        var routes = {};
+        function route (path, innerHTML) {
+            routes[path] = {innerHTML: innerHTML};
+        }
+        var stage = null;
+        function router () {
+            stage = stage || document.getElementById('stage');
+            var url = location.hash.slice(1) || '/';
+            var route = routes[url];
+            if (stage && route.innerHTML) {
+                stage.innerHTML = route.innerHTML
+            }
+        }
+        window.addEventListener('hashchange', router);
+        window.addEventListener('load', router);
+    </script>
+</head>
+<body>
+<ul>
+    <li><a href="#">Home</a></li>
+    <li><a href="#/page1">Page 1</a></li>
+    <li><a href="#/page2">Page 2</a></li>
+</ul>
+<div id="stage"></div>
+<script>
+    route('/', 'home page');
+    route('/page1', '<b>bold page1</b>');
+    route('/page2', '<i>italic page2</i>');
+</script>
+</body>
+</html>

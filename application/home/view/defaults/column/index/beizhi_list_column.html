@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html class=" -webkit-">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, width=device-width">
+    <meta content="telephone=no" name="format-detection">
+    <meta name="apple-mobile-web-app-capable">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>{$info.title}-{$title}</title>
+    <script type="text/javascript" src="__STATIC__/jquery.min.js"></script>
+    <script type="text/javascript" src="__STATIC__/home/defaults/beizhi/list.js"></script>
+    <link rel="stylesheet" type="text/css" href="__STATIC__/home/defaults/css/pages.css">
+</head>
+
+<body id="news">
+<div id="layout-root" style="width: 100%; min-height: 568px; overflow: hidden;">
+    <div id="layout-root-pllist">
+        <div class="f-wraper" id="layout-base" style="position: relative; width: 100%; z-index: 20;">
+            <div class="f-wrap" id="layout-base-pllist" data-box="init-view" style="min-height: 562px;">
+                <!--第一列start-->
+                <div id="layout-content">
+                    <div id="layout-content-pllist" style="overflow-y: hidden; height: auto;">
+                        <div id="pl-home-blogger" style="display: block;">
+                            <div class="bl-home-pic"></div>
+                        </div>
+                        <form method="get" action="{:url('column/index', ['name' => $info.name])}" id="search">
+                            <input name="condition" type="hidden">
+                        <div id="pl-home-blogsort" style="display: block;">
+                            <a data-role="sort-btn" class="blog-all b-txt2" href="javascript:;" trace-code="19_01_26" style="">
+                                    <span data-role="sort-title"  class="click b-ellipsis"
+                                          onclick="location.href='{:url('column/index', ['name' => $info.name])}'">
+                                        {$info.title}</span>
+
+
+                                <p class="seach">
+                                    <input type="text" id="txtsearch1" placeholder="请输入关键字" value="{$fantizi}" style="color: #d8c182">
+                                    <input type="button" class="search_btn" onclick="search1()">
+                                </p>
+
+                            </a>
+                        </div>
+                        </form>
+                        <div id="pl-home-bloglist" style="display: block;">
+                            <article class="bl-content">
+                                <ul data-role="list" class="cont-txt-tit-ls">
+                                    {uk:select table="column"  field="title,name,cover_picture" where="path like '%,[$info.id],%' and template_list!= '[$info.template_list]'"
+                                    order="id asc" limit="50" }
+                                        <li class="txt-tit pic-txt-tit " data-role="item">
+                                            <a data-role="link" href="{:url('column/index',['name'=>$vo.name])}"  class="pic-tit-lk">
+                                                {if $vo.cover_picture}
+                                                <div class="pic b-pic-style" style='background-image: url("__UPLOAD__/{$columList[$vo.name][cover]}");'>
+                                                </div>
+                                                {/if}
+                                                <h2 class="b-txt1 b-ellipsis">{$vo.title}</h2>
+                                            </a>
+                                        </li>
+                                    {/uk:select}
+                                </ul>
+                        </article>
+                    </div>
+                </div>
+            </div>
+            <!--第二列start-->
+
+        </div>
+    </div>
+
+</div>
+</div>
+</body>
+</html>

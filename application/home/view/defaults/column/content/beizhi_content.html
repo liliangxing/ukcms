@@ -1,0 +1,247 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <title>{$data.title}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=10.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="format-detection" content="telephone=no" />
+    <link href="__STATIC__/home/defaults/css/news.css" rel="stylesheet" type="text/css" />
+    <link href="__STATIC__/home/defaults/css/content.css" rel="stylesheet" type="text/css" />
+    <link href="__STATIC__/home/defaults/projekktor/projekktor.style.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="__STATIC__/home/defaults/projekktor/jquery-1.9.1.min.js"></script>
+    <script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script type="text/javascript" src="__STATIC__/home/defaults/beizhi/content_common.js"></script>
+    <script type="text/javascript" src="__STATIC__/home/defaults/beizhi/content.js"></script>
+</head>
+
+<body id="news">
+
+<div id="ui-header">
+
+    <div class="fixed">
+
+        <a class="ui-title" id="popmenu">栏目导航</a>
+
+        <div class="ui-btn-left_pre"
+         data-url="{:url('column/index', ['name' => $info.name])}"></div>
+
+        <div  style="display:none" id='right_nav'>
+            <a class="ui-btn-right_home"
+               style="background: url('__STATIC__/home/defaults/img/editpage32.png') no-repeat center center;background-size:24px auto;"
+               href="javascript:scrollToKeyword();"></a>
+            <a class="ui-btn-right_home"
+               style="background: url('__STATIC__/home/defaults/img/add_up.png') no-repeat center center;background-size:24px auto;right:15%"
+               href="?act=add"></a>
+        </div>
+
+        <a class="ui-btn-right_home" style="background: none" id='right_nav_click'></a>
+
+    </div>
+
+</div>
+
+<div id="overlay"></div>
+
+<div id="win">
+
+    <ul class="dropdown">
+        {volist name="clist" id="vo"}
+            <li><a href="{:url('column/index',['name'=>$vo.name])}"><span>{$vo.title}</span></a>
+            </li>
+        {/volist}
+        <div class="clr"></div>
+
+    </ul>
+
+</div>
+
+
+<div id="search_box">
+    <span><script type="text/javascript" src="__STATIC__/home/defaults/language_all.js"></script></span>
+    <input class="textbox" id="searchstr" type="text" size="11" name="searchstr"/>　
+    <input class="sbttn" id="search_btn" type="button" value="页内查找"/>
+    <div id="search_close" style="display:none">×</div>
+</div>
+<div id="tip"></div>
+
+<div class="Listpage">
+
+    <div class="page-bizinfo">
+        <div class="header" style="position: relative; margin:0px 0 0px 0;">
+            <h1 id="activity-name">{$data.title}</h1>
+            <div class="clr" style="height: 5px;"></div>
+            <span id="post-date">{:date('Y-m-d H:i:s',0)}</span>
+            <span class="header_font">字体大小：
+                <span class="font_size_click" data-id="1.1875" style="text-decoration: underline;">大</span>
+                <span class="font_size_click" data-id="1.125" style="text-decoration: underline;">中</span>
+                <span class="font_size_click" data-id="1.0625">小</span>
+            </span>
+            <div class="clr"></div>
+            <div class="pre_next_box">
+                <div class="pre_next"
+                     id='next_click'></div>
+                <div class="pre_next"
+                     id='pre_click'></div>
+                <div class="clr"></div>
+            </div>
+        </div>
+    </div>
+
+ {if $_GET[playVideo] eq '1' && $data.video_url neq ''}
+      <a href="{$data.video_url}" rel="noreferrer" target="_blank"><div style="height: 100px; position: relative; ">
+        <div class="ppstart active" data-pp-display-func="startbtn"></div></div></a>
+        <div style="padding: 0 0.9rem;">
+            <div class="text_down">下载地址：<br/>
+                <a href="{$data.video_url}"  rel="noreferrer" target="_blank">{$data.video_url}</a> <br/>(请用在新的浏览器打开下载)
+            </div>
+        </div>
+        {/if}
+    <div class="page-bizinfo">
+        {if $_GET[playSound] eq '1' && $data.sound_url neq ''}
+        <a href="{$data.sound_url}" rel="noreferrer" target="_blank"><div style="height: 100px; position: relative; ">
+            <div class="ppstart active" style="background: url(__STATIC__/home/defaults/jplayer/jplayer.blue.monday.jpg) no-repeat left top; width: 40px;height:40px;margin-left:-20px;"></div></div></a>
+    <div class="text_down">mp3下载地址：<br/>
+        <a href="{$data.sound_url}"  rel="noreferrer" target="_blank">{$data.sound_url}</a> <br/>(请用在新的浏览器打开下载)
+    </div>
+{/if}
+        {if $_GET[playVideo] neq '1' && $data.video_url neq ''}
+        <a class="more" data-id="{$data.cname}" href="?playVideo=1" rel="noreferrer">点击进入视频</a>
+        {/if}
+        {if $_GET[playSound] neq '1' && $data.sound_url neq ''}
+        <a class="more" href="?playSound=1"  rel="noreferrer">点击进入mp3</a>
+        {/if}
+        {if ($_GET[playVideo] eq '1' && $data.video_url neq '')|| ($_GET[playSound] eq '1' && $data.sound_url neq '') }
+        <a class="more"  href="?playSound=0"  rel="noreferrer">返回文字版</a>
+        {/if}
+        {if $data.sound_url neq '' && $_GET[playVideo] neq '1'}
+        <span id="mediaPlay" data-id="{$data.sound_url}" class="more">用安卓下载播放mp3</span>
+        {/if}
+
+     <div class="text" id="content" data-id="{$data.cname}">
+        <p>
+
+            {$data.content|raw}
+        </p>
+        <p id="content_end">&nbsp;</p>
+
+        <p class="qrcode">欢迎关注悲智佛网微信公众号，长按图片，识别二维码
+        </p>
+        <div align="center">
+            <img style="width: 80%" src="__STATIC__/home/defaults/img/qrcode.jpg"></div>
+        <p class="qrcode">
+                公众号名称：beizhifw &nbsp; 公众号ID：beizhifw &nbsp;<br/>
+                关注提示：可在微信上搜索 beizhifw ，在搜索内容中点击关注
+        </p>
+
+    </div>
+
+</div>
+
+
+
+<div class="list">
+    <div id="olload">
+        <a href="{:url('column/index', ['name' => $info.name])}"><span>往期回顾</span></a>
+    </div>
+
+
+    <div id="oldlist">
+        <ul>
+            {volist name="list" id="vo"}
+                <li class="newsmore">
+                        <div class="olditem">
+                            <div class="title"><a href="{$vo.url}?playVideo={$_GET[playVideo]}&playSound={$_GET[playSound]}">{$vo.title}</a></div>
+                        </div>
+                </li>
+            {/volist}
+        </ul>
+        <a class="more" href="{:url('column/index', ['name' => $info.name])}">更多精彩内容</a>
+    </div>
+
+</div>
+
+    {uk:select table="column"  field="title,name" where="model_id='2'" order="id asc"}
+    <a class="more_col" href="{:url('column/index',['name'=>$vo.name])}"><span>{$vo.title}</span></a>
+    {/uk:select}
+
+    <div style="position:relative;">
+        <div  id="goTop" class="goTop" >
+        </div>
+    </div>
+<a class="footer" id="backTop" target="_self"><span class="top">返回顶部</span></a>
+<script>
+    $(window).scroll(function () {
+        var sc = $(window).scrollTop();
+        var rwidth = $(window).width() + $(document).scrollLeft();
+        var rheight = $(window).height() + $(document).scrollTop();
+        if (scrollFlag) {
+            document.cookie = "scrollTop{$data['id']}=" + sc;
+        }
+        if (sc > $(window).height() * 0.5) {
+            if (!scrollFlag && canScrollFlag) {
+                scrollFlag = true;
+            }
+            if ($("#goTop").is(":hidden")) {
+                $("#goTop").css("display", "block");
+                $("#goTop").css("right", (($(window).width() - $("body").width()) / 2 + 6) + "px");
+                $("#goTop").css("bottom", (6) + "px");
+            }
+        } else {
+            $("#goTop").css("display", "none");
+        }
+    });
+    $('#searchstr').val(decodeURI("{$_GET[q]}"));
+    setTimeout( function () {
+            $('.header_font').find('span').eq(parseInt(font_size)).trigger("click");
+        var url = window.location.href;
+        var arr;
+        if (url.match(/scrollTo=([^&]+)(&|$)/) != null) {
+            var html = $('#content').html();
+            arr = url.match(/scrollTo=([^&]+)(&|$)/);
+            var arrText = decodeURI(arr[1]).split(" ");
+            var searchText = arrText[0];
+            //只开发到两处空格的情况，多处空格的文本很少出现
+            if(arrText.length>1) {
+                var twoEmpty = arrText[0] + " " + arrText[1];
+                if(html.indexOf(twoEmpty)!=-1){
+                    searchText = twoEmpty;
+                }
+            }
+            var regExp = new RegExp(searchText, 'g');
+            var newHtml = html.replace(regExp, '<span class="highScroll">'+searchText+'</span>');//将找到的关键字替换，加上highlight属性；
+            $('#content').html(newHtml);//更新；
+            if($(".highScroll").length>0) {
+                var _top = $(".highScroll").eq(0).offset().top + $(".highScroll").height();
+                $("html, body").animate({scrollTop: _top - 90});
+            }
+        }else{
+            if (document.cookie.match(/scrollTop{$data['id']}=([^;]+)(;|$)/) != null) {
+             arr = document.cookie.match(/scrollTop{$data['id']}=([^;]+)(;|$)/); //cookies中不为空，则读取滚动条位置
+             document.body.scrollTop = parseInt(arr[1]);
+           }
+        }
+
+        },50
+    );
+    $('#next_click').on('click',function(){
+        {empty name="next"}
+        showTips("没有了", $('#next_click').offset().top+30,2, $('#next_click').offset().left-20);
+        {else}
+        location.href="{$next.url}?playVideo={$_GET[playVideo]}&playSound={$_GET[playSound]}";
+        {/empty}
+
+    });
+
+    $('#pre_click').on('click',function(){
+        {empty name="prev"}
+        showTips("没有了", $('#pre_click').offset().top+30,2, $('#pre_click').offset().left);
+        {else}
+        location.href="{$prev.url}?playVideo={$_GET[playVideo]}&playSound={$_GET[playSound]}";
+        {/empty}
+    });
+</script>
+</body>
+
+</html>

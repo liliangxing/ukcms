@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta content="" name="Keywords">
+    <meta content="" name="Description">
+    <title>{$data.title}</title>
+    <link rel="shortcut icon" href="/favicon.ico"/>
+    <!--[if lte IE 9]>
+    <script src="__STATIC__/home/defaults/forum/js/watermark.js"></script><![endif]-->
+    <!--[if IE 7]>
+    <link href="__STATIC__/home/defaults/forum/css/font_awesome_ie7.css" rel="stylesheet"/><![endif]-->
+</head>
+<body>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title>{pigcms:$info.title}</title>
+    <meta charset="utf-8">
+    <meta content="" name="description">
+    <meta content="" name="keywords">
+    <meta content="application/xhtml+xml;charset=UTF-8" http-equiv="Content-Type">
+    <meta content="no-cache,must-revalidate" http-equiv="Cache-Control">
+    <meta content="no-cache" http-equiv="pragma">
+    <meta content="0" http-equiv="expires">
+    <meta content="telephone=no, address=no" name="format-detection">
+    <meta content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
+          name="viewport">
+    <link rel="stylesheet" type="text/css" href="__STATIC__/home/defaults/forum/css/main.css"></link>
+    <script src="__STATIC__/home/defaults/forum/js/jquery_min.js"></script>
+    <script type="text/javascript" src="__STATIC__/home/defaults/beizhi/content_common.js"></script>
+    <script>
+        $().ready(function () {
+            $(document).keydown(function(e){
+                var e = e || event,
+                    keycode = e.which || e.keyCode;
+                if (keycode==13) {
+                    submit();
+                }
+            });
+        });
+
+        function submit() {
+            var title = $("#form_title").val();
+            if (!title) {
+                alert("请输入标题", 2000);
+                return;
+            }
+            var reg = new RegExp("(\\?|&)act=([^&]*)(&|$)");
+            window.location.href =  changeURLArg(window.location.href.replace(reg,''), "scrollTo",title);
+        }
+    </script>
+</head>
+<body onselectstart="return true;" ondragstart="return false;" class="discuss_comment">
+<div id="container" class="container">
+    <header></header>
+    <div class="body">
+            <section class="form_comment">
+                <header>
+                    <ul class="tbox">
+                        <li>
+                            <a href="javascript:history.back();"
+                               class="cancel">返回</a>
+                        </li>
+                    </ul>
+                </header>
+                <input maxlength="12" id="form_title" class="form_title" type="text" name="title" placeholder="定位..."
+                       value="{$_GET[scrollTo]}"/>
+
+            </section>
+    </div>
+    <footer>
+        <section class="nav_footer">
+            <ul class="box" style="position: static;margin-top: 10px;">
+                <li>
+                    <a href="javascript:submit();" class="on" style="font-size:18px;width:100%;">
+                        <span class="icons_publish">&nbsp;</span>
+                        <label class="pre">预览分享</label>
+                    </a>
+                </li>
+            </ul>
+        </section>
+    </footer>
+</div>
+</body>
+</html>
+</body>
+</html>
