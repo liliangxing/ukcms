@@ -1,0 +1,16 @@
+https://ft.amtb.cn/ft.php?sn=56-214-0046&docstype=txt
+
+https://js1.amtb.cn/media/mp4/56/56-214/56-214-0023.mp4
+
+http://al-media.ciguang.tv/mp4/56/56-214/56-214-0023.mp4
+
+select * from uk_article where sound_url like '%56-214%'  ORDER BY id desc;
+
+
+update uk_article set sound_url = replace('http://al-media.ciguang.tv/mp3/56/56-214/56-214-0045.mp3','45',orders) where cname= 'fjdj' and orders > 45
+
+
+update uk_article set video_url = replace('http://al-media.ciguang.tv/mp4/56/56-214/56-214-0045.mp4','45',orders) where cname= 'fjdj' and orders > 45
+
+
+update uk_article set video_url = replace(video_url,'https://js1.amtb.cn/media/','http://al-media.ciguang.tv/');
