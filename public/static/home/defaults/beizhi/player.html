@@ -1,0 +1,304 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta name="referrer" content="no-referrer">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=10.0, user-scalable=no" />
+    <title>MP3播放器</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+        }
+        .uk-mp3-player {
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+        .uk-mp3-player audio {
+            display: none;
+        }
+        .uk-player-row {
+            overflow: hidden;
+            zoom: 1;
+            margin-bottom: 8px;
+        }
+        .uk-player-actions {
+            margin-bottom: 0;
+            margin-top: 8px;
+        }
+        .uk-play-btn {
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+            line-height: 30px;
+            padding: 0;
+            background: #0f79be;
+            color: #fff;
+            border: 0;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            outline: none;
+            margin-right: 10px;
+            float: left;
+            -webkit-appearance: none;
+        }
+        .uk-play-btn.playing {
+            background: #e67e22;
+        }
+        .uk-time {
+            display: inline-block;
+            float: left;
+            font-size: 14px;
+            color: #333;
+            white-space: nowrap;
+            margin-top: 4px;
+        }
+        .uk-progress-wrap {
+            position: relative;
+            height: 16px;
+            cursor: pointer;
+            -webkit-touch-callout: none;
+        }
+        .uk-progress-bg {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 6px;
+            margin-top: -3px;
+            background: #ddd;
+            border-radius: 3px;
+        }
+        .uk-progress-fill {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 0%;
+            height: 6px;
+            margin-top: -3px;
+            background: #0f79be;
+            border-radius: 3px;
+        }
+        .uk-progress-handle {
+            position: absolute;
+            left: 0%;
+            top: 50%;
+            width: 14px;
+            height: 14px;
+            margin-top: -7px;
+            margin-left: -7px;
+            background: #0f79be;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        .uk-download-link {
+            font-size: 13px;
+            color: #0f79be;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="uk-mp3-player" id="ukMp3Player">
+    <audio preload="metadata" id="ukAudio" referrerpolicy="no-referrer"></audio>
+    <div class="uk-player-row">
+        <button type="button" class="uk-play-btn" id="ukPlayBtn">播放</button>
+        <div class="uk-time"><span class="uk-current" id="ukCurrent">00:00</span> / <span class="uk-duration" id="ukDuration">00:00</span></div>
+    </div>
+    <div class="uk-progress-wrap" id="ukProgressWrap">
+        <div class="uk-progress-bg"></div>
+        <div class="uk-progress-fill" id="ukProgressFill"></div>
+        <div class="uk-progress-handle" id="ukProgressHandle"></div>
+    </div>
+    <div class="uk-player-row uk-player-actions">
+        <a class="uk-download-link" id="ukDownloadLink" href="#" target="_blank" rel="noreferrer">下载 MP3</a>
+    </div>
+</div>
+<script>
+(function () {
+    var audio = document.getElementById("ukAudio");
+    var btn = document.getElementById("ukPlayBtn");
+    var cur = document.getElementById("ukCurrent");
+    var dur = document.getElementById("ukDuration");
+    var wrap = document.getElementById("ukProgressWrap");
+    var fill = document.getElementById("ukProgressFill");
+    var handle = document.getElementById("ukProgressHandle");
+    var dl = document.getElementById("ukDownloadLink");
+    var isSeeking = false;
+    var dragging = false;
+    var hasTouch = ("ontouchstart" in window) || (navigator.maxTouchPoints > 0);
+
+    function getParam(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) return decodeURIComponent(r[2]);
+        return null;
+    }
+
+    function formatAudioTime(seconds) {
+        if (typeof seconds !== "number" || isNaN(seconds) || seconds < 0 || !isFinite(seconds)) {
+            return "00:00";
+        }
+        var total = Math.floor(seconds);
+        var m = Math.floor(total / 60);
+        var s = total % 60;
+        var mm = (m < 10 ? "0" + m : "" + m);
+        var ss = (s < 10 ? "0" + s : "" + s);
+        return mm + ":" + ss;
+    }
+
+    function updateTime() {
+        cur.textContent = formatAudioTime(audio.currentTime);
+        dur.textContent = formatAudioTime(audio.duration);
+    }
+
+    function updateProgress() {
+        var duration = audio.duration;
+        var percent = (duration && isFinite(duration) && duration > 0) ? (audio.currentTime / duration) * 100 : 0;
+        fill.style.width = percent + "%";
+        handle.style.left = percent + "%";
+    }
+
+    function getClientX(e) {
+        if (e.changedTouches && e.changedTouches.length) {
+            return e.changedTouches[0].clientX;
+        }
+        if (e.touches && e.touches.length) {
+            return e.touches[0].clientX;
+        }
+        if (e.clientX !== undefined) {
+            return e.clientX;
+        }
+        return 0;
+    }
+
+    function seekFromEvent(e) {
+        if (!audio.duration || !isFinite(audio.duration) || audio.duration <= 0) return;
+        var rect = wrap.getBoundingClientRect();
+        var x = getClientX(e) - rect.left;
+        var ratio = Math.max(0, Math.min(1, x / rect.width));
+        audio.currentTime = audio.duration * ratio;
+        updateTime();
+        updateProgress();
+    }
+
+    function togglePlay() {
+        if (audio.paused) {
+            var p;
+            try {
+                p = audio.play();
+            } catch (e) {
+                p = null;
+            }
+            if (p && p.catch) {
+                p.catch(function () {});
+            }
+        } else {
+            audio.pause();
+        }
+    }
+
+    wrap.addEventListener("mousedown", function (e) {
+        dragging = true;
+        isSeeking = true;
+        seekFromEvent(e);
+        e.preventDefault();
+    });
+    if (hasTouch) {
+        wrap.addEventListener("touchstart", function (e) {
+            dragging = true;
+            isSeeking = true;
+            seekFromEvent(e);
+            e.preventDefault();
+        });
+    }
+    document.addEventListener("mousemove", function (e) {
+        if (!dragging) return;
+        seekFromEvent(e);
+    });
+    if (hasTouch) {
+        document.addEventListener("touchmove", function (e) {
+            if (!dragging) return;
+            seekFromEvent(e);
+            e.preventDefault();
+        });
+    }
+    document.addEventListener("mouseup", function () {
+        if (!dragging) return;
+        dragging = false;
+        isSeeking = false;
+    });
+    document.addEventListener("touchend", function () {
+        if (!dragging) return;
+        dragging = false;
+        isSeeking = false;
+    });
+    document.addEventListener("touchcancel", function () {
+        if (!dragging) return;
+        dragging = false;
+        isSeeking = false;
+    });
+
+    btn.addEventListener("click", togglePlay);
+
+    audio.addEventListener("play", function () {
+        btn.textContent = "暂停";
+        btn.className = "uk-play-btn playing";
+    });
+    audio.addEventListener("pause", function () {
+        btn.textContent = "播放";
+        btn.className = "uk-play-btn";
+    });
+    audio.addEventListener("ended", function () {
+        btn.textContent = "播放";
+        btn.className = "uk-play-btn";
+        updateProgress();
+    });
+    audio.addEventListener("timeupdate", function () {
+        if (!isSeeking) {
+            updateTime();
+            updateProgress();
+        }
+    });
+    audio.addEventListener("loadedmetadata", updateTime);
+    audio.addEventListener("durationchange", function () {
+        updateTime();
+        updateProgress();
+    });
+    audio.addEventListener("canplay", function () {
+        updateTime();
+        updateProgress();
+    });
+    audio.addEventListener("error", function () {
+        btn.textContent = "播放";
+        btn.className = "uk-play-btn";
+        dur.textContent = "加载失败";
+    });
+
+    var url = getParam("u");
+    if (url) {
+        audio.src = url;
+        dl.href = url;
+        audio.load();
+    }
+
+    updateTime();
+    updateProgress();
+})();
+</script>
+</body>
+</html>
