@@ -2,6 +2,9 @@
 <html>
 <head>
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    {if $data.sound_url neq '' && $_GET[playVideo] neq '1'}
+    <meta name="referrer" content="no-referrer">
+    {/if}
     <title>{$data.title}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=10.0, user-scalable=no" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -99,21 +102,28 @@
         </div>
         {/if}
     <div class="page-bizinfo">
-        {if $_GET[playSound] eq '1' && $data.sound_url neq ''}
-        <a href="{$data.sound_url}" rel="noreferrer" target="_blank"><div style="height: 100px; position: relative; ">
-            <div class="ppstart active" style="background: url(__STATIC__/home/defaults/jplayer/jplayer.blue.monday.jpg) no-repeat left top; width: 40px;height:40px;margin-left:-20px;"></div></div></a>
-    <div class="text_down">mp3下载地址：<br/>
-        <a href="{$data.sound_url}"  rel="noreferrer" target="_blank">{$data.sound_url}</a> <br/>(请用在新的浏览器打开下载)
-    </div>
-{/if}
+        {if $data.sound_url neq '' && $_GET[playVideo] neq '1'}
+        <div class="uk-mp3-player" data-url="{$data.sound_url}">
+            <audio preload="metadata" src="{$data.sound_url}" referrerpolicy="no-referrer"></audio>
+            <div class="uk-player-row">
+                <button type="button" class="uk-play-btn">播放</button>
+                <div class="uk-time"><span class="uk-current">00:00</span> / <span class="uk-duration">00:00</span></div>
+            </div>
+            <div class="uk-progress-wrap">
+                <div class="uk-progress-bg"></div>
+                <div class="uk-progress-fill"></div>
+                <div class="uk-progress-handle"></div>
+            </div>
+            <div class="uk-player-row uk-player-actions">
+                <a class="uk-download-link" href="{$data.sound_url}" target="_blank" rel="noreferrer">下载 MP3</a>
+            </div>
+        </div>
+        {/if}
         {if $_GET[playVideo] neq '1' && $data.video_url neq ''}
         <a class="more" data-id="{$data.cname}" href="?playVideo=1" rel="noreferrer">点击进入视频</a>
         {/if}
-        {if $_GET[playSound] neq '1' && $data.sound_url neq ''}
-        <a class="more" href="?playSound=1"  rel="noreferrer">点击进入mp3</a>
-        {/if}
-        {if ($_GET[playVideo] eq '1' && $data.video_url neq '')|| ($_GET[playSound] eq '1' && $data.sound_url neq '') }
-        <a class="more"  href="?playSound=0"  rel="noreferrer">返回文字版</a>
+        {if $_GET[playVideo] eq '1' && $data.video_url neq ''}
+        <a class="more" href="?" rel="noreferrer">返回文字版</a>
         {/if}
         {if $data.sound_url neq '' && $_GET[playVideo] neq '1'}
         <span id="mediaPlay" data-id="{$data.sound_url}" class="more">用安卓下载播放mp3</span>

@@ -168,6 +168,8 @@ $(function(){
         }
     });
 
+    initAudioPlayers();
+
     $( 'body' ).append( tipsDiv );
 });
 
@@ -320,4 +322,169 @@ function doClose(){
     $('#search_close').hide();
     $("#search_btn").val("页内查找");
     $("#search_btn").css("position","static");
+}
+
+function formatAudioTime(seconds) {
+    if (typeof seconds !== 'number' || isNaN(seconds) || seconds < 0 || !isFinite(seconds)) {
+        return "00:00";
+    }
+    var total = Math.floor(seconds);
+    var m = Math.floor(total / 60);
+    var s = total % 60;
+    var mm = (m < 10 ? "0" + m : "" + m);
+    var ss = (s < 10 ? "0" + s : "" + s);
+    return mm + ":" + ss;
+}
+
+function initAudioPlayers() {
+    var activePlayer = null;
+
+    function supportsPointer() {
+        return window.PointerEvent ? true : false;
+    }
+
+    function getClientX(e) {
+        var oe = e.originalEvent || e;
+        if (oe.changedTouches && oe.changedTouches.length) {
+            return oe.changedTouches[0].clientX;
+        }
+        if (oe.touches && oe.touches.length) {
+            return oe.touches[0].clientX;
+        }
+        if (oe.clientX !== undefined) {
+            return oe.clientX;
+        }
+        return 0;
+    }
+
+    function bindProgressDrag($wrap, audio, $fill, $handle, seekFromEvent, onDragStart, onDragEnd) {
+        var dragging = false;
+        var hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+        $wrap.on('mousedown', function (e) {
+            dragging = true;
+            onDragStart();
+            seekFromEvent(e);
+            e.preventDefault();
+        });
+        if (hasTouch) {
+            $wrap.on('touchstart', function (e) {
+                dragging = true;
+                onDragStart();
+                seekFromEvent(e);
+                e.preventDefault();
+            });
+        }
+        $(document).on('mousemove', function (e) {
+            if (!dragging) return;
+            seekFromEvent(e);
+        });
+        if (hasTouch) {
+            $(document).on('touchmove', function (e) {
+                if (!dragging) return;
+                seekFromEvent(e);
+                e.preventDefault();
+            });
+        }
+        $(document).on('mouseup touchend touchcancel', function () {
+            if (!dragging) return;
+            dragging = false;
+            onDragEnd();
+        });
+    }
+
+    $(".uk-mp3-player").each(function () {
+        var $player = $(this);
+        var $audio = $player.find("audio");
+        var audio = $audio[0];
+        var $btn = $player.find(".uk-play-btn");
+        var $current = $player.find(".uk-current");
+        var $duration = $player.find(".uk-duration");
+        var $wrap = $player.find(".uk-progress-wrap");
+        var $fill = $player.find(".uk-progress-fill");
+        var $handle = $player.find(".uk-progress-handle");
+        var isSeeking = false;
+
+        function updateTime() {
+            $current.text(formatAudioTime(audio.currentTime));
+            $duration.text(formatAudioTime(audio.duration));
+        }
+
+        function updateProgress() {
+            var duration = audio.duration;
+            var percent = (duration && isFinite(duration) && duration > 0) ? (audio.currentTime / duration) * 100 : 0;
+            $fill.css("width", percent + "%");
+            $handle.css("left", percent + "%");
+        }
+
+        function seekFromEvent(e) {
+            if (!audio.duration || !isFinite(audio.duration) || audio.duration <= 0) return;
+            var rect = $wrap[0].getBoundingClientRect();
+            var clientX = getClientX(e);
+            var x = clientX - rect.left;
+            var ratio = Math.max(0, Math.min(1, x / rect.width));
+            audio.currentTime = audio.duration * ratio;
+            updateTime();
+            updateProgress();
+        }
+
+        function togglePlay() {
+            if (audio.paused) {
+                var p;
+                try {
+                    p = audio.play();
+                } catch (e) {
+                    p = null;
+                }
+                if (p && p.catch) {
+                    p.catch(function () {});
+                }
+            } else {
+                audio.pause();
+            }
+        }
+
+        $btn.on("click", function () {
+            togglePlay();
+        });
+
+        $audio.on("play", function () {
+            $btn.text("暂停").addClass("playing");
+        });
+
+        $audio.on("pause", function () {
+            $btn.text("播放").removeClass("playing");
+        });
+
+        $audio.on("ended", function () {
+            $btn.text("播放").removeClass("playing");
+            updateProgress();
+        });
+
+        $audio.on("timeupdate", function () {
+            if (!isSeeking) {
+                updateTime();
+                updateProgress();
+            }
+        });
+
+        $audio.on("loadedmetadata durationchange canplay", function () {
+            updateTime();
+            updateProgress();
+        });
+
+        $audio.on("error", function () {
+            $btn.text("播放").removeClass("playing");
+            $duration.text("加载失败");
+        });
+
+        bindProgressDrag($wrap, audio, $fill, $handle, seekFromEvent, function () {
+            isSeeking = true;
+        }, function () {
+            isSeeking = false;
+        });
+
+        updateTime();
+        updateProgress();
+    });
 }
