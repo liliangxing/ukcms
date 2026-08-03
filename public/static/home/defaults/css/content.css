@@ -21,10 +21,10 @@ div#content p.qrcode{font-size: 14px !important;line-height: 1.5;}
 .highlight { background: yellow;}
 .prelight { background: blue; color: white; }
 #tip { background: #FFFFCC;  width: 200px; text-align: center; display: none; font-size: 12px; }
-#search_box { text-align:right;height: 30px;  z-index: 4; padding: 0 10px 0 0;}
+#search_box { text-align:right;height: 44px;  z-index: 4; padding: 0 10px 0 0; line-height: 44px;}
 #search_box span a{ text-decoration: underline; padding:1px 12px 1px 0;}
-#search_btn { background: #0f79be; margin-top: 6px; border-radius: 2px; border: 0px; width: 100px; line-height: 24px; color: white; }
-#searchstr { font-size: 14px; height: 20px; }
+#search_btn { background: #0f79be; margin-top: 0; border-radius: 2px; border: 0px; width: 100px; height: 30px; line-height: 30px; color: white; font-size: 15px; vertical-align: middle; }
+#searchstr { font-size: 16px; height: 30px; vertical-align: middle; padding: 0 8px; }
 #news .more_col {
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
@@ -85,16 +85,20 @@ div#content p.qrcode{font-size: 14px !important;line-height: 1.5;}
 	overflow: hidden;
 	zoom: 1;
 	margin-bottom: 8px;
+	display: flex;
+	align-items: center;
 }
 .uk-player-actions {
 	margin-bottom: 0;
 	margin-top: 8px;
 }
 .uk-play-btn {
-	display: inline-block;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	width: 60px;
 	height: 30px;
-	line-height: 30px;
+	line-height: 1;
 	padding: 0;
 	background: #0f79be;
 	color: #fff;
@@ -103,20 +107,26 @@ div#content p.qrcode{font-size: 14px !important;line-height: 1.5;}
 	font-size: 14px;
 	cursor: pointer;
 	outline: none;
-	margin-right: 10px;
-	float: left;
+	margin: 0 10px 0 0;
+	flex: 0 0 auto;
 	-webkit-appearance: none;
 }
 .uk-play-btn.playing {
 	background: #e67e22;
 }
 .uk-time {
-	display: inline-block;
-	float: left;
+	display: flex;
+	align-items: baseline;
 	font-size: 14px;
 	color: #333;
 	white-space: nowrap;
-	margin-top: 4px;
+	line-height: 1;
+}
+.uk-current {
+	display: inline-block;
+	width: 3.5em;
+	text-align: right;
+	font-variant-numeric: tabular-nums;
 }
 .uk-progress-wrap {
 	position: relative;

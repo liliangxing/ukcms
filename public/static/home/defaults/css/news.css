@@ -162,7 +162,7 @@ h3 {
 	border: 0 none;
 }
 /*popmenu*/
-#popmenu{cursor:pointer; display:block; position:relative;  text-align: center; width: 200px; margin:0 auto}
+#popmenu{cursor:pointer; display:block; position:relative;  text-align: center; width: 200px; margin:0 auto; text-indent: 0;}
 #popmenu:after {
     content: "";
     width: 0;

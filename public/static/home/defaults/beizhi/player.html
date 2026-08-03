@@ -33,16 +33,20 @@
             overflow: hidden;
             zoom: 1;
             margin-bottom: 8px;
+            display: flex;
+            align-items: center;
         }
         .uk-player-actions {
             margin-bottom: 0;
             margin-top: 8px;
         }
         .uk-play-btn {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             width: 60px;
             height: 30px;
-            line-height: 30px;
+            line-height: 1;
             padding: 0;
             background: #0f79be;
             color: #fff;
@@ -51,20 +55,26 @@
             font-size: 14px;
             cursor: pointer;
             outline: none;
-            margin-right: 10px;
-            float: left;
+            margin: 0 10px 0 0;
+            flex: 0 0 auto;
             -webkit-appearance: none;
         }
         .uk-play-btn.playing {
             background: #e67e22;
         }
         .uk-time {
-            display: inline-block;
-            float: left;
+            display: flex;
+            align-items: baseline;
             font-size: 14px;
             color: #333;
             white-space: nowrap;
-            margin-top: 4px;
+            line-height: 1;
+        }
+        .uk-current {
+            display: inline-block;
+            width: 3.5em;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
         }
         .uk-progress-wrap {
             position: relative;
@@ -142,6 +152,27 @@
     var dragging = false;
     var hasTouch = ("ontouchstart" in window) || (navigator.maxTouchPoints > 0);
 
+    function getNativeBridge() {
+        try {
+            if (window.itcast) return window.itcast;
+            if (window.parent && window.parent !== window && window.parent.itcast) return window.parent.itcast;
+        } catch (e) {}
+        return null;
+    }
+
+    var nativeBridge = getNativeBridge();
+    var nativeMode = isNativeSupported(nativeBridge);
+    var nativeStarted = false;
+    var nativeState = null;
+
+    function isNativeSupported(b) {
+        return !!(b && typeof b.playMusic === "function"
+            && typeof b.pauseMusic === "function"
+            && typeof b.resumeMusic === "function"
+            && typeof b.seekTo === "function"
+            && typeof b.getState === "function");
+    }
+
     function getParam(name) {
         var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
         var r = window.location.search.substr(1).match(reg);
@@ -196,7 +227,91 @@
         updateProgress();
     }
 
+    function getNativeState() {
+        if (!nativeMode) return null;
+        try {
+            var raw = nativeBridge.getState();
+            if (!raw) return null;
+            if (typeof raw === "object") return raw;
+            return JSON.parse(raw);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function setUIPlaying() {
+        btn.textContent = "暂停";
+        btn.className = "uk-play-btn playing";
+    }
+
+    function setUIPaused() {
+        btn.textContent = "播放";
+        btn.className = "uk-play-btn";
+    }
+
+    function nativePoll() {
+        if (!nativeMode) return;
+        var st = getNativeState();
+        if (!st) return;
+        nativeState = st;
+        if (st.playing) {
+            setUIPlaying();
+        } else if (st.finished) {
+            nativeStarted = false;
+            setUIPaused();
+        } else if (st.loading) {
+            btn.textContent = "加载中";
+            btn.className = "uk-play-btn";
+        }
+        if (typeof st.position === "number" && typeof st.duration === "number" && st.duration > 0) {
+            if (!isSeeking) {
+                cur.textContent = formatAudioTime(st.position / 1000);
+                dur.textContent = formatAudioTime(st.duration / 1000);
+                var pct = Math.min(100, (st.position / st.duration) * 100);
+                fill.style.width = pct + "%";
+                handle.style.left = pct + "%";
+            }
+        } else if (st.playing) {
+            cur.textContent = formatAudioTime(0);
+            dur.textContent = "加载中";
+        }
+    }
+
+    function startNativePolling() {
+        nativePoll();
+        if (nativeMode) {
+            setInterval(nativePoll, 300);
+        }
+    }
+
+    function nativeSeekFromEvent(e) {
+        var st = getNativeState();
+        var duration = st ? st.duration : 0;
+        if (!duration || !isFinite(duration) || duration <= 0) return;
+        var rect = wrap.getBoundingClientRect();
+        var x = getClientX(e) - rect.left;
+        var ratio = Math.max(0, Math.min(1, x / rect.width));
+        nativeBridge.seekTo(Math.round(duration * ratio));
+        nativePoll();
+    }
+
     function togglePlay() {
+        if (nativeMode) {
+            if (!nativeStarted) {
+                nativeBridge.playMusic(url);
+                nativeStarted = true;
+                setUIPlaying();
+            } else {
+                var st = getNativeState();
+                if (st && st.playing) {
+                    nativeBridge.pauseMusic();
+                } else {
+                    nativeBridge.resumeMusic();
+                }
+            }
+            nativePoll();
+            return;
+        }
         if (audio.paused) {
             var p;
             try {
@@ -215,25 +330,41 @@
     wrap.addEventListener("mousedown", function (e) {
         dragging = true;
         isSeeking = true;
-        seekFromEvent(e);
+        if (nativeMode) {
+            nativeSeekFromEvent(e);
+        } else {
+            seekFromEvent(e);
+        }
         e.preventDefault();
     });
     if (hasTouch) {
         wrap.addEventListener("touchstart", function (e) {
             dragging = true;
             isSeeking = true;
-            seekFromEvent(e);
+            if (nativeMode) {
+                nativeSeekFromEvent(e);
+            } else {
+                seekFromEvent(e);
+            }
             e.preventDefault();
         });
     }
     document.addEventListener("mousemove", function (e) {
         if (!dragging) return;
-        seekFromEvent(e);
+        if (nativeMode) {
+            nativeSeekFromEvent(e);
+        } else {
+            seekFromEvent(e);
+        }
     });
     if (hasTouch) {
         document.addEventListener("touchmove", function (e) {
             if (!dragging) return;
-            seekFromEvent(e);
+            if (nativeMode) {
+                nativeSeekFromEvent(e);
+            } else {
+                seekFromEvent(e);
+            }
             e.preventDefault();
         });
     }
@@ -291,9 +422,13 @@
 
     var url = getParam("u");
     if (url) {
-        audio.src = url;
         dl.href = url;
-        audio.load();
+        if (nativeMode) {
+            startNativePolling();
+        } else {
+            audio.src = url;
+            audio.load();
+        }
     }
 
     updateTime();
