@@ -21,10 +21,11 @@ div#content p.qrcode{font-size: 14px !important;line-height: 1.5;}
 .highlight { background: yellow;}
 .prelight { background: blue; color: white; }
 #tip { background: #FFFFCC;  width: 200px; text-align: center; display: none; font-size: 12px; }
-#search_box { display:flex; justify-content:flex-end; align-items:center; height: 44px; z-index: 4; padding: 0 10px 0 0; line-height: 44px; white-space: nowrap; overflow: hidden; }
+#search_box { position: relative; height: 44px; z-index: 4; padding: 0; white-space: nowrap; overflow: hidden; }
+#search_box span { position: absolute; left: 0; top: 0; height: 44px; line-height: 44px; white-space: nowrap; }
 #search_box span a{ text-decoration: underline; padding:1px 12px 1px 0;}
-#search_btn { background: #0f79be; border-radius: 2px; border: 0px; width: 100px; height: 30px; line-height: 30px; color: white; font-size: 15px; flex: 0 0 auto; }
-#searchstr { font-size: 16px; height: 30px; vertical-align: middle; padding: 0 8px; width: 140px; box-sizing: border-box; flex: 0 0 auto; }
+#search_btn { background: #0f79be; border-radius: 2px; border: 0px; width: 100px; height: 30px; line-height: 30px; color: white; font-size: 15px; position: absolute; right: 10px; top: 7px; }
+#searchstr { font-size: 16px; height: 30px; vertical-align: middle; padding: 0 8px; width: 140px; box-sizing: border-box; position: absolute; right: 116px; top: 7px; }
 #news .more_col {
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
