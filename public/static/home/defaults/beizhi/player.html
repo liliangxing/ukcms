@@ -76,6 +76,10 @@
             text-align: right;
             font-variant-numeric: tabular-nums;
         }
+        .uk-time-sep {
+            margin: 0 6px;
+            color: #999;
+        }
         .uk-progress-wrap {
             position: relative;
             height: 16px;
@@ -127,7 +131,7 @@
     <audio preload="metadata" id="ukAudio" referrerpolicy="no-referrer"></audio>
     <div class="uk-player-row">
         <button type="button" class="uk-play-btn" id="ukPlayBtn">播放</button>
-        <div class="uk-time"><span class="uk-current" id="ukCurrent">00:00</span> / <span class="uk-duration" id="ukDuration">00:00</span></div>
+        <div class="uk-time"><span class="uk-current" id="ukCurrent">00:00</span><span class="uk-time-sep">/</span><span class="uk-duration" id="ukDuration">00:00</span></div>
     </div>
     <div class="uk-progress-wrap" id="ukProgressWrap">
         <div class="uk-progress-bg"></div>

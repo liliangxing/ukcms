@@ -271,7 +271,9 @@ top: 0;
 right:0;
 	}
 #ui-header .fixed {
-	display: block;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	margin: 0 auto;
     min-width: 320px;
 	height: 45px;
